@@ -6,13 +6,13 @@ services:
       - "8091-8096:8091-8096"
       - "11210-11211:11210-11211"
     entrypoint: >
-      sh -c "echo 'Launching couchbase' &&
+      sh -c "echo 'Initializing couchbase' &&
           /usr/sbin/runsvdir-start &
           (
               ok=1; \
               while [ $$ok != 0 ]; do \
                   sleep 5; \
-                  echo 'Couchbase is starting (rest api not available)'; \
+                  echo 'Starting Couchbase'; \
                   curl --connect-timeout 1 -s  http://127.0.0.1:8091 > /dev/null; \
                   ok=$$?; \
               done
@@ -25,4 +25,4 @@ services:
               couchbase-cli bucket-create -c 127.0.0.1:8091 -u test -p 123456 --bucket=test --bucket-type=couchbase --bucket-ramsize=300
           ) &&
               echo 'Initialization done' &&
-              tail -f /opt/couchbase/var/lib/couchbase/logs/error.log"
+              wait"
