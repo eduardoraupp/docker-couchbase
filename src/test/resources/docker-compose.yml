@@ -1,0 +1,28 @@
+version: "3"
+services:
+  couchbase-test:
+    build: .
+    ports:
+      - "8091-8096:8091-8096"
+      - "11210-11211:11210-11211"
+    entrypoint: >
+      sh -c "echo 'Launching couchbase' &&
+          /usr/sbin/runsvdir-start &
+          (
+              ok=1; \
+              while [ $$ok != 0 ]; do \
+                  sleep 5; \
+                  echo 'Couchbase is starting (rest api not available)'; \
+                  curl --connect-timeout 1 -s  http://127.0.0.1:8091 > /dev/null; \
+                  ok=$$?; \
+              done
+          ) &&
+          (
+              echo 'Configuring Couchbase' &&
+              echo 'Creating cluster' &&
+              couchbase-cli cluster-init -c 127.0.0.1:8091 --cluster-username=test --cluster-password=123456 --cluster-ramsize=512 --cluster-index-ramsize=512 --cluster-fts-ramsize=256 --services=data,index,query,fts &&
+              echo 'Creating 'test' bucket' &&
+              couchbase-cli bucket-create -c 127.0.0.1:8091 -u test -p 123456 --bucket=test --bucket-type=couchbase --bucket-ramsize=300
+          ) &&
+              echo 'Initialization done' &&
+              tail -f /opt/couchbase/var/lib/couchbase/logs/error.log"
