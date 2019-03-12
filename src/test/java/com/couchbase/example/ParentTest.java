@@ -18,9 +18,14 @@ public abstract class ParentTest {
 		environment.start();
 	}
 	
+	private static boolean isContainerAlreadyRunning = false;
+	
 	@BeforeClass
 	public static void timeOut() throws InterruptedException {
-		Thread.sleep(5000);
+		if(!isContainerAlreadyRunning) {
+			Thread.sleep(5000);
+			isContainerAlreadyRunning = true;
+		}
 	}
 
 	
